@@ -13,7 +13,7 @@ jobs:
           git clone https://github.com/rdp/ffmpeg-windows-build-helpers.git
           cd ffmpeg-windows-build-helpers
           sudo apt-get update
-          sudo apt-get install subversion ragel curl texinfo g++ bison flex cvs yasm automake libtool autoconf gcc cmake git make pkg-config zlib1g-dev mercurial unzip pax nasm gperf autogen bzip2 autoconf-archive p7zip-full meson clang python3
+          sudo apt-get install subversion ragel curl texinfo g++ bison flex cvs yasm automake libtool autoconf gcc cmake git make pkg-config zlib1g-dev mercurial unzip pax nasm gperf autogen bzip2 autoconf-archive p7zip-full meson clang python3 python3-pip python3-setuptools python3-wheel ninja-build
           sudo pip3 install meson ninja
       - name: Build ffmpeg
         run: |
