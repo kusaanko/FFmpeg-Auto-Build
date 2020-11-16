@@ -20,7 +20,7 @@ jobs:
           cp meson.py meson
           echo 'export PATH=$HOME/meson:$PATH' >> ~/.bashrc
           source ~/.bashrc
-          cd ~/ffmpeg-windows-build-helpers
+          cd ../ffmpeg-windows-build-helpers
       - name: Build ffmpeg
         run: |
           ./cross_compile_ffmpeg.sh --build-ffmpeg-shared=n --ffmpeg-git-checkout-version=$CHECKOUT_VERSION --enable-gpl=n --compiler-flavors=multi
