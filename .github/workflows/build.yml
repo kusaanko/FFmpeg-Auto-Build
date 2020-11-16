@@ -1,0 +1,27 @@
+name: Build ffmpeg
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Preparing build
+        run: |
+          git clone https://github.com/rdp/ffmpeg-windows-build-helpers.github
+          cd ffmpeg-windows-build-helpers
+          sudo apt-get update
+          sudo apt-get install subversion ragel curl texinfo g++ bison flex cvs yasm automake libtool autoconf gcc cmake git make pkg-config zlib1g-dev mercurial unzip pax nasm gperf autogen bzip2 autoconf-archive p7zip-full meson clang
+          cd ~
+          git clone https://github.com/mesonbuild/meson.git
+          cd meson
+          cp meson.py meson
+          echo 'export PATH=$HOME/meson:$PATH' >> ~/.bashrc
+          source ~/.bashrc
+          cd ~/ffmpeg-windows-build-helpers
+      - name: Build ffmpeg
+        run: |
+          ./cross_compile_ffmpeg.sh --build-ffmpeg-shared=n --ffmpeg-git-checkout-version=$CHECKOUT_VERSION --enable-gpl=n --compiler-flavors=multi
+        env:
+          CHECKOUT_VERSION: n4.3.1
