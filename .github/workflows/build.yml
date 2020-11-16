@@ -7,6 +7,12 @@ jobs:
   build_ffmpeg:
     name: Build ffmpeg
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [win32,win64] #win32 or win64
+        variant: [gpl,lgpl,gpl-shared,lgpl-shared]
+        version: [none,n4.3.1]
     steps:
       - name: Preparing build
         run: |
@@ -17,7 +23,13 @@ jobs:
           sudo pip3 install meson ninja
       - name: Build ffmpeg
         run: |
+          if [[ ${{ matrix.variant }} == *"lgpl"* ]];then GPL="n";else GPL="y";fi
+          if [[ ${{ matrix.variant }} == *"shared"* ]];then SHARED="y";else SHARED="n";fi
+          if [[ ${{ matrix.version }} == *"none"* ]];then VERSION="";else VERSION="--ffmpeg-git-checkout-version=${{ matrix.version }}";fi
           cd ffmpeg-windows-build-helpers
-          ./cross_compile_ffmpeg.sh --build-ffmpeg-shared=n --ffmpeg-git-checkout-version=$CHECKOUT_VERSION --enable-gpl=n --compiler-flavors=multi
-        env:
-          CHECKOUT_VERSION: n4.3.1
+          ./cross_compile_ffmpeg.sh --build-ffmpeg-shared=$SHARED $VERSION --enable-gpl=$GPL --compiler-flavors=${{ matrix.target }} --build-intel-qsv=y --build-amd-amf=y
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ffmpeg_build
+          path: ffmpeg-windows-build-helpers/sandbox/win*
