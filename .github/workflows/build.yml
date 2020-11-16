@@ -17,6 +17,7 @@ jobs:
           sudo pip3 install meson ninja
       - name: Build ffmpeg
         run: |
+          cd ffmpeg-windows-build-helpers
           ./cross_compile_ffmpeg.sh --build-ffmpeg-shared=n --ffmpeg-git-checkout-version=$CHECKOUT_VERSION --enable-gpl=n --compiler-flavors=multi
         env:
           CHECKOUT_VERSION: n4.3.1
