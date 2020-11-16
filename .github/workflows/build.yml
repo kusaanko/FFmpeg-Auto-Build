@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [win32,win64] #win32 or win64
+        target: [win32,win64] #win32 , win64 or multi
         variant: [gpl,lgpl,gpl-shared,lgpl-shared]
         version: [none,n4.3.1]
     steps:
