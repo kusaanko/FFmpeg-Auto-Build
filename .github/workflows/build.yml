@@ -36,4 +36,10 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ffmpeg_build
-          path: ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*
+          path: |
+            ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/bin/
+            ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/doc/
+            ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/include/
+            ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/lib/
+            ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/*.exe
+            ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/COPYING*
