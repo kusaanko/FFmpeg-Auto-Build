@@ -43,3 +43,36 @@ jobs:
             ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/lib/
             ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/*.exe
             ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/COPYING*
+          if-no-files-found: ignore
+  publish_release:
+    name: Publish release
+    needs: build_ffmpeg
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: ffmpeg_build
+          path: ffmpeg_build
+      - name: Zip upload files
+        run: |
+          cd ./ffmpeg_build/win32
+          for FILE in ./*;do cd $(basename $FILE); zip -r ../../../win32_$(basename $FILE).zip ./; cd ../;done
+          cd ./ffmpeg_build/win64
+          for FILE in ./* ;do cd $(basename $FILE); zip -r ../../../win64_$(basename $FILE).zip ./; cd ../;done
+      - name: Create Release
+        run: |
+          set -e
+          NAME="FFmpeg $(date +'%Y-%m-%d')"
+          TAGNAME="workflow-$(date +'%Y%m%d%H%M')"
+          hub release create $(for zip in ./*.zip; do echo -a $zip; done) -m "$NAME" -t "main" "$TAGNAME"
+          echo "Created release tag: ${TAGNAME}"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Prune old release
+        run: |
+          set -e
+          git fetch --tags
+          TAGS=( $(git tag -l "workflow-*") )
+          for TAG in ${TAGS[@]}; do echo "Deleting ${TAG}"; hub release delete "${TAG}"; git tag -d "${TAG}"; done
+          git push --tags --prune
