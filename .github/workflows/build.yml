@@ -58,6 +58,7 @@ jobs:
         run: |
           cd ./ffmpeg_build/win32
           for FILE in ./*;do cd $(basename $FILE); zip -r ../../../win32_$(basename $FILE).zip ./; cd ../;done
+          cd ../../
           cd ./ffmpeg_build/win64
           for FILE in ./* ;do cd $(basename $FILE); zip -r ../../../win64_$(basename $FILE).zip ./; cd ../;done
       - name: Create Release
@@ -65,7 +66,7 @@ jobs:
           set -e
           NAME="FFmpeg $(date +'%Y-%m-%d')"
           TAGNAME="workflow-$(date +'%Y%m%d%H%M')"
-          hub release create $(for zip in ./*.zip; do echo -a $zip; done) -m "$NAME" -t "main" "$TAGNAME"
+          hub release create $(for zip in ./win*.zip; do echo -a $zip; done) -m "$NAME" -t "main" "$TAGNAME"
           echo "Created release tag: ${TAGNAME}"
         env:
           GITHUB_TOKEN: ${{ github.token }}
