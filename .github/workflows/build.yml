@@ -11,8 +11,8 @@ jobs:
       fail-fast: false
       matrix:
         target: [win32,win64] #win32 , win64 or multi
-        variant: [gpl,lgpl,gpl-shared,lgpl-shared]
-        version: [none,n4.3.1]
+        variant: [gpl-static-shared,lgpl-static-shared] #gpl or lgpl, -static or -shared
+        version: [none,n4.3.1] #none or version(tag)
     steps:
       - name: Preparing build
         run: |
@@ -27,14 +27,19 @@ jobs:
           if [[ "$(lsb_release -rs)" == *"20.04"* ]];then sudo apt install python-is-python3 -y ;fi
           sudo pip3 install meson ninja
       - name: Build ffmpeg
-        run: |
-          if [[ ${{ matrix.variant }} == *"lgpl"* ]];then GPL="n";else GPL="y";fi
-          if [[ ${{ matrix.variant }} == *"shared"* ]];then SHARED="y";else SHARED="n";fi
-          if [[ ${{ matrix.version }} == *"none"* ]];then VERSION="";else VERSION="--ffmpeg-git-checkout-version=${{ matrix.version }}";fi
-          cd ffmpeg-windows-build-helpers
-          sed -i -e 's/--enable-libaribb24 //' ./cross_compile_ffmpeg.sh
-          sed -i -e 's/--enable-libx264 --enable-libx265/--enable-libx264 --enable-libx265 --enable-libaribb24/' ./cross_compile_ffmpeg.sh
-          ./cross_compile_ffmpeg.sh --build-ffmpeg-shared=$SHARED $VERSION --enable-gpl=$GPL --compiler-flavors=${{ matrix.target }} --build-intel-qsv=y --build-amd-amf=y
+        uses: nick-invision/retry@v2
+        with:
+          timeout_seconds: 15
+          max_attempts: 5
+          command: |
+            if [[ ${{ matrix.variant }} == *"lgpl"* ]];then GPL="n";else GPL="y";fi
+            if [[ ${{ matrix.variant }} == *"static"* ]];then STATIC="y";else STATIC="n";fi
+            if [[ ${{ matrix.variant }} == *"shared"* ]];then SHARED="y";else SHARED="n";fi
+            if [[ ${{ matrix.version }} == *"none"* ]];then VERSION="";else VERSION="--ffmpeg-git-checkout-version=${{ matrix.version }}";fi
+            cd ffmpeg-windows-build-helpers
+            sed -i -e 's/--enable-libaribb24 //' ./cross_compile_ffmpeg.sh
+            sed -i -e 's/--enable-libx264 --enable-libx265/--enable-libx264 --enable-libx265 --enable-libaribb24/' ./cross_compile_ffmpeg.sh
+            ./cross_compile_ffmpeg.sh --build-ffmpeg-static=$STATIC --build-ffmpeg-shared=$SHARED $VERSION --enable-gpl=$GPL --compiler-flavors=${{ matrix.target }} --build-intel-qsv=y --build-amd-amf=y
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -65,16 +70,7 @@ jobs:
           for FILE in ./*;do cd $(basename $FILE); zip -r ../../../win32_$(basename $FILE).zip ./; cd ../;done
           cd ../../
           cd ./ffmpeg_build/win64
-          for FILE in ./* ;do cd $(basename $FILE); zip -r ../../../win64_$(basename $FILE).zip ./; cd ../;done
-      - name: Create Release
-        run: |
-          set -e
-          NAME="FFmpeg $(date +'%Y-%m-%d')"
-          TAGNAME="workflow-$(date +'%Y%m%d%H%M')"
-          hub release create $(for zip in ./win*.zip; do echo -a $zip; done) -m "$NAME" -t "main" "$TAGNAME"
-          echo "Created release tag: ${TAGNAME}"
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+          for FILE in ./* ;do cd $(basename $FILE); FILE_NAME="win64_$(basename $FILE).zip"; FILE_NAME=${FILENAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILENAME/ffmpeg_git/ffmpeg_gpl}; zip -r ../../../$FILE_NAME ./; cd ../;done
       - name: Prune old release
         run: |
           set -e
@@ -82,3 +78,13 @@ jobs:
           TAGS=( $(git tag -l "workflow-*") )
           for TAG in ${TAGS[@]}; do echo "Deleting ${TAG}"; hub release delete "${TAG}"; git tag -d "${TAG}"; done
           git push --tags --prune
+      - name: Create Release
+        run: |
+          set -e
+          NAME="FFmpeg $(date +'%Y-%m-%d')"
+          TAGNAME="workflow-$(date +'%Y%m%d%H%M')"
+          echo "Creating release tag: ${TAGNAME}"
+          hub release create $(for zip in ./win*.zip; do echo -a $zip; done) -m "$NAME" -t "main" "$TAGNAME"
+          echo "Created release tag: ${TAGNAME}"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
