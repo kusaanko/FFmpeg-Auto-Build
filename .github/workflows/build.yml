@@ -71,7 +71,7 @@ jobs:
           for FILE in ./*;do cd $(basename $FILE); zip -r ../../../win32_$(basename $FILE).zip ./; cd ../;done
           cd ../../
           cd ./ffmpeg_build/win64
-          for FILE in ./* ;do cd $(basename $FILE); FILE_NAME="win64_$(basename $FILE).zip"; FILE_NAME=${FILENAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILENAME/ffmpeg_git/ffmpeg_gpl}; zip -r ../../../$FILE_NAME ./; cd ../;done
+          for FILE in ./* ;do cd $(basename $FILE); FILE_NAME="win64_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILENAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILENAME/ffmpeg_git/ffmpeg_gpl}; zip -r ../../../$FILE_NAME ./; cd ../;done
       - name: Prune old release
         run: |
           set -e
