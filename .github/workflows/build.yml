@@ -27,20 +27,15 @@ jobs:
           if [[ "$(lsb_release -rs)" == *"20.04"* ]];then sudo apt install python-is-python3 -y ;fi
           sudo pip3 install meson ninja
       - name: Build ffmpeg
-        uses: nick-invision/retry@v2
-        with:
-          timeout_minutes: 360
-          max_attempts: 5
-          retry_on: error
-          command: |
-            if [[ ${{ matrix.variant }} == *"lgpl"* ]];then GPL="n";else GPL="y";fi
-            if [[ ${{ matrix.variant }} == *"static"* ]];then STATIC="y";else STATIC="n";fi
-            if [[ ${{ matrix.variant }} == *"shared"* ]];then SHARED="y";else SHARED="n";fi
-            if [[ ${{ matrix.version }} == *"none"* ]];then VERSION="";else VERSION="--ffmpeg-git-checkout-version=${{ matrix.version }}";fi
-            cd ffmpeg-windows-build-helpers
-            sed -i -e 's/--enable-libaribb24 //' ./cross_compile_ffmpeg.sh
-            sed -i -e 's/--enable-libx264 --enable-libx265/--enable-libx264 --enable-libx265 --enable-libaribb24/' ./cross_compile_ffmpeg.sh
-            ./cross_compile_ffmpeg.sh --build-ffmpeg-static=$STATIC --build-ffmpeg-shared=$SHARED $VERSION --enable-gpl=$GPL --compiler-flavors=${{ matrix.target }} --build-intel-qsv=y --build-amd-amf=y
+        run: |
+          if [[ ${{ matrix.variant }} == *"lgpl"* ]];then GPL="n";else GPL="y";fi
+          if [[ ${{ matrix.variant }} == *"static"* ]];then STATIC="y";else STATIC="n";fi
+          if [[ ${{ matrix.variant }} == *"shared"* ]];then SHARED="y";else SHARED="n";fi
+          if [[ ${{ matrix.version }} == *"none"* ]];then VERSION="";else VERSION="--ffmpeg-git-checkout-version=${{ matrix.version }}";fi
+          cd ffmpeg-windows-build-helpers
+          sed -i -e 's/--enable-libaribb24 //' ./cross_compile_ffmpeg.sh
+          sed -i -e 's/--enable-libx264 --enable-libx265/--enable-libx264 --enable-libx265 --enable-libaribb24/' ./cross_compile_ffmpeg.sh
+          ./cross_compile_ffmpeg.sh --build-ffmpeg-static=$STATIC --build-ffmpeg-shared=$SHARED $VERSION --enable-gpl=$GPL --compiler-flavors=${{ matrix.target }} --build-intel-qsv=y --build-amd-amf=y
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
