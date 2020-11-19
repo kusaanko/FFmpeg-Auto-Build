@@ -47,7 +47,7 @@ jobs:
           name: ffmpeg_build
           path: |
             ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/bin/
-            ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/doc/
+            ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/doc/*.html
             ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/include/
             ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/lib/
             ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/*.exe
