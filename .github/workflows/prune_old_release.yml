@@ -14,8 +14,11 @@ jobs:
         run: |
           set -e
           git fetch --tags
-          TAGS=( $(git tag -l "workflow-*") )
-          for TAG in ${TAGS[@]}; do echo "Deleting ${TAG}"; hub release delete "${TAG}"; git tag -d "${TAG}"; done
+          TAGS=$(git tag -l "workflow-*" | sort)
+          IFS=$'\n'
+          LINE_COUNT=0
+          for TAG in $TAGS; do LINE_COUNT=$((++LINE_COUNT)); done
+          for TAG in $TAGS; do if [[ $LINE_COUNT > 3 ]];then LINE_COUNT=$((--LINE_COUNT));else break;fi; echo "Deleting $TAG"; hub release delete "$TAG"; git tag -d "$TAG"; done
           git push --tags --prune
         env:
           GITHUB_TOKEN: ${{ github.token }}
