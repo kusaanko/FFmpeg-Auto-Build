@@ -17,3 +17,5 @@ jobs:
           TAGS=( $(git tag -l "workflow-*") )
           for TAG in ${TAGS[@]}; do echo "Deleting ${TAG}"; hub release delete "${TAG}"; git tag -d "${TAG}"; done
           git push --tags --prune
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
