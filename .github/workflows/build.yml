@@ -29,7 +29,6 @@ jobs:
       - name: Build ffmpeg
         uses: nick-invision/retry@v2
         with:
-          timeout_seconds: 15
           max_attempts: 5
           command: |
             if [[ ${{ matrix.variant }} == *"lgpl"* ]];then GPL="n";else GPL="y";fi
