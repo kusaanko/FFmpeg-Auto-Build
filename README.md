@@ -15,5 +15,4 @@ win32-ffmpeg-gpl-n4.3.1-shared
 If you are using Windows 64bit and you want to use stable version of ffmpeg, you should download win64-ffmpeg-gpl-n(version).
 
 # Tools used
-ffmpeg-windows-build-helpers - https://github.com/rdp/ffmpeg-windows-build-helpers  
-Retry steps - https://github.com/marketplace/actions/retry-step
+ffmpeg-windows-build-helpers - https://github.com/rdp/ffmpeg-windows-build-helpers
