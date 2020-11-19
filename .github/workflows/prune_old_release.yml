@@ -1,0 +1,19 @@
+name: Prune old releases
+
+on:
+  workflow_dispatch:
+
+jobs:
+  prune_old_release:
+    name: Prune old releases
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Prune old release
+        run: |
+          set -e
+          git fetch --tags
+          TAGS=( $(git tag -l "workflow-*") )
+          for TAG in ${TAGS[@]}; do echo "Deleting ${TAG}"; hub release delete "${TAG}"; git tag -d "${TAG}"; done
+          git push --tags --prune
