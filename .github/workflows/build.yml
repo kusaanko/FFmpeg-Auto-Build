@@ -1,6 +1,8 @@
 name: Build ffmpeg
 
 on:
+  schedule:
+    cron: 0 4 * * 0,3
   workflow_dispatch:
 
 jobs:
