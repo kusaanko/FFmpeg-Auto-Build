@@ -1,5 +1,6 @@
 # FFmpeg-Auto-Build
 This project uses GitHub Actions.  
+The FFmpeg auto-build runs every Sunday and Wednesday at 4 am UTC time.  
 
 # Which asset do I download?
 This is an example of an asset name.  
