@@ -61,21 +61,24 @@ jobs:
         with:
           name: ffmpeg_build
           path: ffmpeg_build
-      - name: Zip upload files
+      - name: Compress upload files
         run: |
           cd ./ffmpeg_build/win32
-          for FILE in ./*;do cd $(basename $FILE); FILE_NAME="win32_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"shared"* ]];then rm ./*.exe;fi; zip -r ../../../$FILE_NAME ./; cd ../;done
+          for FILE in ./*;do cd $(basename $FILE); FILE_NAME="win32_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"shared"* ]];then rm ./*.exe;fi; echo Compressing $FILE_NAME...; zip -r ../../../$FILE_NAME ./; cd ../;done
           cd ../../
           cd ./ffmpeg_build/win64
-          for FILE in ./* ;do cd $(basename $FILE); FILE_NAME="win64_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"shared"* ]];then rm ./*.exe;fi; zip -r ../../../$FILE_NAME ./; cd ../;done
+          for FILE in ./* ;do cd $(basename $FILE); FILE_NAME="win64_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"shared"* ]];then rm ./*.exe;fi; echo Compressing $FILE_NAME...; zip -r ../../../$FILE_NAME ./; cd ../;done
       - name: Create Release
         run: |
           set -e
           NAME="FFmpeg $(date +'%Y-%m-%d')"
           TAGNAME="workflow-$(date +'%Y%m%d%H%M')"
-          echo "Creating release tag: ${TAGNAME}"
-          hub release create $(for zip in ./win*.zip; do echo -a $zip; done) -m "$NAME" -t "main" "$TAGNAME"
-          echo "Created release tag: ${TAGNAME}"
+          echo "Creating draft tag: $TAGNAME"
+          hub release create --draft $(for zip in ./win*.zip; do echo --attach $zip; done) -m "$NAME" -t "main" "$TAGNAME"
+          echo "Created draft tag: $TAGNAME"
+          echo "Publishing draft tag: $TAGNAME"
+          hub release edit --draft=false $TAGNAME
+          echo "Published draft tag: $TAGNAME"
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Prune old release
