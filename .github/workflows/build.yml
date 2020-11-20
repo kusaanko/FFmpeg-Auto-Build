@@ -46,6 +46,7 @@ jobs:
             ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/include/
             ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/lib/
             ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/*.exe
+            !ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/*_g.exe
             ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/COPYING*
           if-no-files-found: ignore
   publish_release:
@@ -63,10 +64,10 @@ jobs:
       - name: Zip upload files
         run: |
           cd ./ffmpeg_build/win32
-          for FILE in ./*;do cd $(basename $FILE); zip -r ../../../win32_$(basename $FILE).zip ./; cd ../;done
+          for FILE in ./*;do cd $(basename $FILE); FILE_NAME="win32_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"lgpl"* ]];then rm ./*.exe;fi; zip -r ../../../$FILE_NAME ./; cd ../;done
           cd ../../
           cd ./ffmpeg_build/win64
-          for FILE in ./* ;do cd $(basename $FILE); FILE_NAME="win64_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILENAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILENAME/ffmpeg_git/ffmpeg_gpl}; zip -r ../../../$FILE_NAME ./; cd ../;done
+          for FILE in ./* ;do cd $(basename $FILE); FILE_NAME="win64_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"lgpl"* ]];then rm ./*.exe;fi; zip -r ../../../$FILE_NAME ./; cd ../;done
       - name: Create Release
         run: |
           set -e
