@@ -64,10 +64,10 @@ jobs:
       - name: Zip upload files
         run: |
           cd ./ffmpeg_build/win32
-          for FILE in ./*;do cd $(basename $FILE); FILE_NAME="win32_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"lgpl"* ]];then rm ./*.exe;fi; zip -r ../../../$FILE_NAME ./; cd ../;done
+          for FILE in ./*;do cd $(basename $FILE); FILE_NAME="win32_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"shared"* ]];then rm ./*.exe;fi; zip -r ../../../$FILE_NAME ./; cd ../;done
           cd ../../
           cd ./ffmpeg_build/win64
-          for FILE in ./* ;do cd $(basename $FILE); FILE_NAME="win64_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"lgpl"* ]];then rm ./*.exe;fi; zip -r ../../../$FILE_NAME ./; cd ../;done
+          for FILE in ./* ;do cd $(basename $FILE); FILE_NAME="win64_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"shared"* ]];then rm ./*.exe;fi; zip -r ../../../$FILE_NAME ./; cd ../;done
       - name: Create Release
         run: |
           set -e
