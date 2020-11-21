@@ -17,7 +17,7 @@ jobs:
           hub release create --draft -m "$NAME" -t "main" "$TAGNAME"
           echo "Created draft tag: $TAGNAME"
           echo "Publishing draft tag: $TAGNAME"
-          hub release edit --draft=false $TAGNAME
+          hub release edit --draft=false $TAGNAME -m ""
           echo "Published draft tag: $TAGNAME"
         env:
           GITHUB_TOKEN: ${{ github.token }}
