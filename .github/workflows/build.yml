@@ -79,10 +79,11 @@ jobs:
           hub release create --draft $(for zip in ./win*.zip; do echo --attach $zip; done) -m "$NAME" -t "main" "$TAGNAME"
           echo "Created draft tag: $TAGNAME"
           echo "Publishing draft tag: $TAGNAME"
-          hub release edit --draft=false $TAGNAME
+          hub release edit --draft=false $TAGNAME -m ""
           echo "Published draft tag: $TAGNAME"
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          GIT_EDITOR: ${{ github.token }}
       - name: Prune old release
         run: |
           set -e
