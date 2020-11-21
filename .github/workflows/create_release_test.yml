@@ -1,0 +1,24 @@
+name: Create release test
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Create Release
+        run: |
+          set -e
+          NAME="FFmpeg $(date +'%Y-%m-%d')"
+          TAGNAME="workflow-$(date +'%Y%m%d%H%M')"
+          echo "Creating draft tag: $TAGNAME"
+          hub release create --draft -m "$NAME" -t "main" "$TAGNAME"
+          echo "Created draft tag: $TAGNAME"
+          echo "Publishing draft tag: $TAGNAME"
+          hub release edit --draft=false $TAGNAME
+          echo "Published draft tag: $TAGNAME"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GIT_EDITOR: ${{ github.token }}
