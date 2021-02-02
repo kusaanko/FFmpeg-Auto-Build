@@ -1,8 +1,8 @@
 name: Build ffmpeg on Ubuntu 20.04
 
 on:
-  schedule:
-   - cron: 0 4 * * 0,3
+  #schedule:
+  # - cron: 0 4 * * 0,3
   workflow_dispatch:
 
 jobs:
