@@ -1,8 +1,8 @@
 name: Build ffmpeg on Ubuntu 20.04
 
 on:
-  #schedule:
-  # - cron: 0 4 * * 0,3
+  schedule:
+   - cron: 0 4 * * 0,3
   workflow_dispatch:
 
 jobs:
@@ -35,8 +35,6 @@ jobs:
           if [[ ${{ matrix.variant }} == *"shared"* ]];then SHARED="y";else SHARED="n";fi
           if [[ ${{ matrix.version }} == *"none"* ]];then VERSION="";else VERSION="--ffmpeg-git-checkout-version=${{ matrix.version }}";fi
           cd ffmpeg-windows-build-helpers
-          sed -i -e 's/--enable-libaribb24 //' ./cross_compile_ffmpeg.sh
-          sed -i -e 's/--enable-libx264 --enable-libx265/--enable-libx264 --enable-libx265 --enable-libaribb24/' ./cross_compile_ffmpeg.sh
           ./cross_compile_ffmpeg.sh --build-ffmpeg-static=$STATIC --build-ffmpeg-shared=$SHARED $VERSION --enable-gpl=$GPL --compiler-flavors=${{ matrix.target }} --build-intel-qsv=y --build-amd-amf=y
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
@@ -54,7 +52,7 @@ jobs:
   publish_release:
     name: Publish release
     needs: build_ffmpeg
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
