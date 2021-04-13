@@ -14,7 +14,7 @@ jobs:
       matrix:
         target: [win32,win64] #win32 , win64 or multi
         variant: [gpl-static-shared,lgpl-static-shared] #gpl or lgpl, -static or -shared
-        version: [none,n4.3.1] #none or version(tag)
+        version: [none,n4.4] #none or version(tag)
     steps:
       - name: Preparing build
         run: |
