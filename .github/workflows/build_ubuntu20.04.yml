@@ -15,6 +15,7 @@ jobs:
         target: [win32,win64] #win32 , win64 or multi
         variant: [gpl-static-shared,lgpl-static-shared] #gpl or lgpl, -static or -shared
         version: [none,n4.4] #none or version(tag)
+        tree: [none,f54d39f1afd2f4f246ddfab2218aa819b7560dab] #none or tree hash
     steps:
       - name: Preparing build
         run: |
@@ -23,6 +24,7 @@ jobs:
           echo deb http://archive.ubuntu.com/ubuntu focal -updates main multiverse universe restricted | sudo tee -a /etc/apt/sources.list
           git clone https://github.com/rdp/ffmpeg-windows-build-helpers.git
           cd ffmpeg-windows-build-helpers
+          if [[ ${{ matrix.tree }} != *"none"* ]];then git checkout ${{ matrix.tree }};fi
           sudo apt-get update
           sudo apt-get install subversion ragel curl texinfo g++ bison flex cvs yasm automake libtool autoconf gcc cmake git make pkg-config zlib1g-dev mercurial unzip pax nasm gperf autogen bzip2 autoconf-archive p7zip-full clang python3 python3-pip python3-setuptools python3-wheel ninja-build -y
           if [[ "$(lsb_release -rs)" == *"18.04"* ]];then sudo apt install python3-distutils -y ;fi
