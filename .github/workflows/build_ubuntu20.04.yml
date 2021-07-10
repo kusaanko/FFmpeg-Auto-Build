@@ -30,8 +30,6 @@ jobs:
           sudo pip3 install meson ninja
       - name: Build ffmpeg
         run: |
-          matrix_version=${{ matrix.version }}
-          if [[ $matrix_version == *"-"* ]];then VERSION=${matrix_version%%-*};else VERSION=${matrix_version};fi
           if [[ ${{ matrix.variant }} == *"lgpl"* ]];then GPL="n";else GPL="y";fi
           if [[ ${{ matrix.variant }} == *"static"* ]];then STATIC="y";else STATIC="n";fi
           if [[ ${{ matrix.variant }} == *"shared"* ]];then SHARED="y";else SHARED="n";fi
