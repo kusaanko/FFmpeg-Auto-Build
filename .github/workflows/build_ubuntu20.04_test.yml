@@ -1,0 +1,94 @@
+name: Test build ffmpeg on Ubuntu 20.04
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_ffmpeg:
+    name: Build ffmpeg
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [win32,win64] #win32 , win64 or multi
+        variant: [gpl-static-shared,lgpl-static-shared] #gpl or lgpl, -static or -shared
+        version: [none,n4.4] #none or version(tag) with tree hash
+    steps:
+      - name: Preparing build
+        run: |
+          echo deb http://archive.ubuntu.com/ubuntu focal  main universe multiverse restricted | sudo tee /etc/apt/sources.list
+          echo deb http://security.ubuntu.com/ubuntu/ focal -security main multiverse universe restricted | sudo tee -a /etc/apt/sources.list
+          echo deb http://archive.ubuntu.com/ubuntu focal -updates main multiverse universe restricted | sudo tee -a /etc/apt/sources.list
+          if [[ ${{ matrix.version }} == *"n4.4"* ]];then git clone -b ffmpeg_n4.4_test https://github.com/kusaanko/ffmpeg-windows-build-helpers.git;else git clone -b ffmpeg_master_test https://github.com/kusaanko/ffmpeg-windows-build-helpers.git;fi
+          cd ffmpeg-windows-build-helpers
+          sudo apt-get update
+          sudo apt-get install subversion ragel curl texinfo g++ bison flex cvs yasm automake libtool autoconf gcc cmake git make pkg-config zlib1g-dev mercurial unzip pax nasm gperf autogen bzip2 autoconf-archive p7zip-full clang python3 python3-pip python3-setuptools python3-wheel ninja-build -y
+          if [[ "$(lsb_release -rs)" == *"18.04"* ]];then sudo apt install python3-distutils -y ;fi
+          if [[ "$(lsb_release -rs)" == *"20.04"* ]];then sudo apt install python-is-python3 -y ;fi
+          sudo pip3 install meson ninja
+      - name: Build ffmpeg
+        run: |
+          if [[ ${{ matrix.variant }} == *"lgpl"* ]];then GPL="n";else GPL="y";fi
+          if [[ ${{ matrix.variant }} == *"static"* ]];then STATIC="y";else STATIC="n";fi
+          if [[ ${{ matrix.variant }} == *"shared"* ]];then SHARED="y";else SHARED="n";fi
+          if [[ ${{ matrix.version }} == *"none"* ]];then VERSION="";else VERSION="--ffmpeg-git-checkout-version=${{ matrix.version }}";fi
+          cd ffmpeg-windows-build-helpers
+          ./cross_compile_ffmpeg.sh --build-ffmpeg-static=$STATIC --build-ffmpeg-shared=$SHARED $VERSION --enable-gpl=$GPL --compiler-flavors=${{ matrix.target }} --build-intel-qsv=y --build-amd-amf=y
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ffmpeg_build
+          path: |
+            ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/bin/
+            ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/doc/*.html
+            ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/include/
+            ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/lib/
+            ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/*.exe
+            !ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/*_g.exe
+            ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/COPYING*
+          if-no-files-found: ignore
+  publish_release:
+    name: Publish release
+    needs: build_ffmpeg
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: ffmpeg_build
+          path: ffmpeg_build
+      - name: Compress upload files
+        run: |
+          cd ./ffmpeg_build/win32
+          for FILE in ./*;do cd $(basename $FILE); FILE_NAME="win32_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"shared"* ]];then rm ./*.exe;fi; echo Compressing $FILE_NAME...; zip -r ../../../$FILE_NAME ./; cd ../;done
+          cd ../../
+          cd ./ffmpeg_build/win64
+          for FILE in ./* ;do cd $(basename $FILE); FILE_NAME="win64_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"shared"* ]];then rm ./*.exe;fi; echo Compressing $FILE_NAME...; zip -r ../../../$FILE_NAME ./; cd ../;done
+      - name: Create Release
+        run: |
+          set -e
+          NAME="FFmpeg $(date +'%Y-%m-%d')"
+          TAGNAME="workflow-$(date +'%Y%m%d%H%M')"
+          echo "Creating draft tag: $TAGNAME"
+          hub release create --draft $(for zip in ./win*.zip; do echo --attach $zip; done) -m "$NAME" -t "main" "$TAGNAME"
+          echo "Created draft tag: $TAGNAME"
+          echo "Publishing draft tag: $TAGNAME"
+          hub release edit --draft=false $TAGNAME -m ""
+          echo "Published draft tag: $TAGNAME"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GIT_EDITOR: ${{ github.token }}
+      - name: Prune old release
+        run: |
+          set -e
+          git fetch --tags
+          TAGS=$(git tag -l "workflow-*" | sort)
+          IFS=$'\n'
+          LINE_COUNT=0
+          for TAG in $TAGS; do LINE_COUNT=$((++LINE_COUNT)); done
+          for TAG in $TAGS; do if [[ $LINE_COUNT > 3 ]];then LINE_COUNT=$((--LINE_COUNT));else break;fi; echo "Deleting $TAG"; hub release delete "$TAG"; git tag -d "$TAG"; done
+          git push --tags --prune
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
