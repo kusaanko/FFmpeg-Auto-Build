@@ -18,9 +18,6 @@ jobs:
     steps:
       - name: Preparing build
         run: |
-          echo deb http://archive.ubuntu.com/ubuntu focal  main universe multiverse restricted | sudo tee /etc/apt/sources.list
-          echo deb http://security.ubuntu.com/ubuntu/ focal -security main multiverse universe restricted | sudo tee -a /etc/apt/sources.list
-          echo deb http://archive.ubuntu.com/ubuntu focal -updates main multiverse universe restricted | sudo tee -a /etc/apt/sources.list
           # if [[ ${{ matrix.version }} == *"n4.4"* ]];then git clone -b ffmpeg_n4.4 https://github.com/kusaanko/ffmpeg-windows-build-helpers.git;else git clone -b ffmpeg_master https://github.com/kusaanko/ffmpeg-windows-build-helpers.git;fi
           git clone https://github.com/rdp/ffmpeg-windows-build-helpers.git
           cd ffmpeg-windows-build-helpers
