@@ -1,4 +1,4 @@
-name: Build ffmpeg on Ubuntu 20.04
+name: Build ffmpeg on Ubuntu 22.04
 
 on:
   schedule:
