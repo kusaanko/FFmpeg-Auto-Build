@@ -35,7 +35,7 @@ jobs:
           cd ffmpeg-windows-build-helpers
           ./cross_compile_ffmpeg.sh --build-ffmpeg-static=$STATIC --build-ffmpeg-shared=$SHARED $VERSION --enable-gpl=$GPL --compiler-flavors=${{ matrix.target }} --build-intel-qsv=y --build-amd-amf=y
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ffmpeg_build
           path: |
