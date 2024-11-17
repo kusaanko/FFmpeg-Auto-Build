@@ -37,7 +37,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ffmpeg_build
+          name: ffmpeg_build_${{ matrix.target }}_${{ matrix.variant }}
           path: |
             ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/bin/
             ffmpeg-windows-build-helpers/sandbox/win*/ffmpeg*/doc/*.html
@@ -61,14 +61,19 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          name: ffmpeg_build
           path: ffmpeg_build
       - name: Compress upload files
         run: |
-          cd ./ffmpeg_build/win32
+          cd ./ffmpeg_build/ffmpeg_build_win32_gpl-static-shared
           for FILE in ./*;do cd $(basename $FILE); FILE_NAME="win32_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"shared"* ]];then rm ./*.exe;fi; echo Compressing $FILE_NAME...; zip -r ../../../$FILE_NAME ./; cd ../;done
           cd ../../
-          cd ./ffmpeg_build/win64
+          cd ./ffmpeg_build/ffmpeg_build_win32_lgpl-static-shared
+          for FILE in ./*;do cd $(basename $FILE); FILE_NAME="win32_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"shared"* ]];then rm ./*.exe;fi; echo Compressing $FILE_NAME...; zip -r ../../../$FILE_NAME ./; cd ../;done
+          cd ../../
+          cd ./ffmpeg_build/ffmpeg_build_win64_gpl-static-shared
+          for FILE in ./* ;do cd $(basename $FILE); FILE_NAME="win64_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"shared"* ]];then rm ./*.exe;fi; echo Compressing $FILE_NAME...; zip -r ../../../$FILE_NAME ./; cd ../;done
+          cd ../../
+          cd ./ffmpeg_build/ffmpeg_build_win64_lgpl-static-shared
           for FILE in ./* ;do cd $(basename $FILE); FILE_NAME="win64_$(basename $FILE)_$(date +'%Y%m%d').zip"; FILE_NAME=${FILE_NAME/ffmpeg_git_lgpl/ffmpeg_lgpl}; FILE_NAME=${FILE_NAME/ffmpeg_git/ffmpeg_gpl}; if [[ $FILE_NAME == *"shared"* ]];then rm ./*.exe;fi; echo Compressing $FILE_NAME...; zip -r ../../../$FILE_NAME ./; cd ../;done
       - name: Create Release
         run: |
